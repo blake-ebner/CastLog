@@ -8,7 +8,7 @@ A full-stack fishing catch-logging app built with FastAPI + React.
 - **Database**: PostgreSQL 16
 - **Auth**: JWT (python-jose + bcrypt)
 - **File storage**: Local volume (`/uploads`), abstracted for easy S3 swap
-- **Frontend**: React 18 · TypeScript · Vite · Tailwind CSS *(coming soon)*
+- **Frontend**: React 18 · TypeScript · Vite · Tailwind CSS
 - **Containerization**: Docker + Docker Compose
 
 ---
