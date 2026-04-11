@@ -25,35 +25,33 @@ export default function Achievements({ achievements }: Props) {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-slate-800 mb-3">
+      <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-3">
         Achievements
-        <span className="ml-2 text-sm font-normal text-slate-400">
+        <span className="ml-2 text-sm font-normal text-slate-400 dark:text-slate-500">
           {unlocked.length}/{achievements.length}
         </span>
       </h2>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {/* Unlocked first */}
         {unlocked.map((a) => (
           <div
             key={a.id}
-            className="bg-white border border-amber-200 rounded-xl p-4 flex flex-col items-center text-center shadow-sm"
+            className="bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-700/50 rounded-xl p-4 flex flex-col items-center text-center shadow-sm"
           >
             <span className="text-3xl mb-2">{ICONS[a.id] ?? '🎖️'}</span>
-            <p className="text-sm font-semibold text-slate-800">{a.name}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{a.description}</p>
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{a.name}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{a.description}</p>
           </div>
         ))}
 
-        {/* Locked */}
         {locked.map((a) => (
           <div
             key={a.id}
-            className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center text-center opacity-50"
+            className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex flex-col items-center text-center opacity-50"
           >
             <span className="text-3xl mb-2 grayscale">{ICONS[a.id] ?? '🎖️'}</span>
-            <p className="text-sm font-semibold text-slate-500">{a.name}</p>
-            <p className="text-xs text-slate-400 mt-0.5">{a.description}</p>
+            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{a.name}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{a.description}</p>
           </div>
         ))}
       </div>

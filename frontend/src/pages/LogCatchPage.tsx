@@ -43,8 +43,7 @@ export default function LogCatchPage() {
     const file = e.target.files?.[0] ?? null
     setPhoto(file)
     if (file) {
-      const url = URL.createObjectURL(file)
-      setPreview(url)
+      setPreview(URL.createObjectURL(file))
     } else {
       setPreview(null)
     }
@@ -78,7 +77,7 @@ export default function LogCatchPage() {
     if (form.water_temp_f) fd.append('water_temp_f', form.water_temp_f)
     fd.append('kept', form.kept ? 'true' : 'false')
     if (form.notes) fd.append('notes', form.notes)
-    if (photo) fd.append('photo', photo)
+    fd.append('photo', photo)
 
     try {
       const created = await apiCreateCatch(fd)
@@ -91,25 +90,25 @@ export default function LogCatchPage() {
   }
 
   const inputCls =
-    'w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-  const labelCls = 'block text-sm font-medium text-slate-700 mb-1'
+    'w-full border rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+  const labelCls = 'block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1'
+  const sectionCls = 'bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 space-y-4'
+  const sectionHeadCls = 'font-semibold text-slate-700 dark:text-slate-300 text-sm uppercase tracking-wide'
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Log a Catch</h1>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Log a Catch</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 text-sm">
+          <div className="text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm">
             {error}
           </div>
         )}
 
-        {/* Species — required */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-          <h2 className="font-semibold text-slate-700 text-sm uppercase tracking-wide">
-            The Fish
-          </h2>
+        {/* The Fish */}
+        <div className={sectionCls}>
+          <h2 className={sectionHeadCls}>The Fish</h2>
           <div>
             <label className={labelCls}>
               Species <span className="text-red-500">*</span>
@@ -153,17 +152,15 @@ export default function LogCatchPage() {
               type="checkbox"
               checked={form.kept}
               onChange={(e) => set('kept', e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
             />
-            <span className="text-sm text-slate-700">Fish was kept</span>
+            <span className="text-sm text-slate-700 dark:text-slate-300">Fish was kept</span>
           </label>
         </div>
 
-        {/* Location & time */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-          <h2 className="font-semibold text-slate-700 text-sm uppercase tracking-wide">
-            Where & When
-          </h2>
+        {/* Where */}
+        <div className={sectionCls}>
+          <h2 className={sectionHeadCls}>Where</h2>
           <div>
             <label className={labelCls}>Water body</label>
             <input
@@ -177,10 +174,8 @@ export default function LogCatchPage() {
         </div>
 
         {/* Method & conditions */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-          <h2 className="font-semibold text-slate-700 text-sm uppercase tracking-wide">
-            Method & Conditions
-          </h2>
+        <div className={sectionCls}>
+          <h2 className={sectionHeadCls}>Method & Conditions</h2>
           <div>
             <label className={labelCls}>Bait / Lure</label>
             <input
@@ -200,9 +195,7 @@ export default function LogCatchPage() {
             >
               <option value="">— Select —</option>
               {TECHNIQUE_OPTIONS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
+                <option key={t} value={t}>{t}</option>
               ))}
             </select>
           </div>
@@ -216,9 +209,7 @@ export default function LogCatchPage() {
               >
                 <option value="">— Select —</option>
                 {WEATHER_OPTIONS.map((w) => (
-                  <option key={w} value={w}>
-                    {w}
-                  </option>
+                  <option key={w} value={w}>{w}</option>
                 ))}
               </select>
             </div>
@@ -237,10 +228,8 @@ export default function LogCatchPage() {
         </div>
 
         {/* Notes & photo */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-          <h2 className="font-semibold text-slate-700 text-sm uppercase tracking-wide">
-            Notes & Photo
-          </h2>
+        <div className={sectionCls}>
+          <h2 className={sectionHeadCls}>Notes & Photo</h2>
           <div>
             <label className={labelCls}>Notes</label>
             <textarea
@@ -268,7 +257,7 @@ export default function LogCatchPage() {
                 <img
                   src={preview}
                   alt="preview"
-                  className="w-full h-48 object-cover rounded-lg border border-slate-200"
+                  className="w-full h-48 object-cover rounded-lg border border-slate-200 dark:border-slate-600"
                 />
                 <button
                   type="button"
@@ -277,7 +266,7 @@ export default function LogCatchPage() {
                     setPreview(null)
                     if (fileRef.current) fileRef.current.value = ''
                   }}
-                  className="absolute top-2 right-2 bg-white/80 hover:bg-white text-slate-700 rounded-full w-7 h-7 flex items-center justify-center shadow text-xs font-bold transition-colors"
+                  className="absolute top-2 right-2 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-full w-7 h-7 flex items-center justify-center shadow text-xs font-bold transition-colors"
                 >
                   ✕
                 </button>
@@ -286,7 +275,7 @@ export default function LogCatchPage() {
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="w-full border-2 border-dashed border-red-300 hover:border-blue-400 rounded-lg h-28 flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-blue-600 transition-colors text-sm"
+                className="w-full border-2 border-dashed border-red-300 dark:border-red-800 hover:border-blue-400 dark:hover:border-blue-500 rounded-lg h-28 flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm"
               >
                 <span className="text-2xl">📷</span>
                 Click to upload a photo (required)
@@ -299,7 +288,7 @@ export default function LogCatchPage() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="flex-1 border border-slate-300 text-slate-700 py-2.5 rounded-lg font-medium text-sm hover:bg-slate-50 transition-colors"
+            className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 py-2.5 rounded-lg font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
           >
             Cancel
           </button>

@@ -53,7 +53,6 @@ export default function SpeciesInput({ value, onChange, inputClassName }: Props)
     }
   }
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -65,10 +64,10 @@ export default function SpeciesInput({ value, onChange, inputClassName }: Props)
   }, [])
 
   const borderColor = value === ''
-    ? 'border-slate-300'
+    ? 'border-slate-300 dark:border-slate-600'
     : isValid
-      ? 'border-green-400'
-      : 'border-red-400'
+      ? 'border-green-400 dark:border-green-500'
+      : 'border-red-400 dark:border-red-500'
 
   return (
     <div ref={containerRef} className="relative">
@@ -87,13 +86,13 @@ export default function SpeciesInput({ value, onChange, inputClassName }: Props)
       />
 
       {value !== '' && !isValid && (
-        <p className="text-xs text-red-500 mt-1">
+        <p className="text-xs text-red-500 dark:text-red-400 mt-1">
           Select a species from the list.
         </p>
       )}
 
       {open && (
-        <ul className="absolute z-50 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <ul className="absolute z-50 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {suggestions.map((fish, i) => (
             <li
               key={fish}
@@ -101,7 +100,7 @@ export default function SpeciesInput({ value, onChange, inputClassName }: Props)
               className={`px-3 py-2 text-sm cursor-pointer ${
                 i === activeIndex
                   ? 'bg-blue-600 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
+                  : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
               }`}
             >
               {fish}
