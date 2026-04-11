@@ -10,10 +10,25 @@ export interface UserOut {
   created_at: string
 }
 
+export interface Achievement {
+  id: string
+  name: string
+  description: string
+  unlocked: boolean
+}
+
+export interface SpeciesRecord {
+  species: string
+  weight_lbs: number
+  catch_id: number
+}
+
 export interface UserStats {
   total_catches: number
   species_count: number
   personal_best_lbs: number | null
+  species_records: SpeciesRecord[]
+  achievements: Achievement[]
 }
 
 export interface UserProfile {
@@ -38,6 +53,7 @@ export interface CatchOut {
   photo_url: string | null
   created_at: string
   username: string | null
+  is_personal_best: boolean
 }
 
 export interface PaginatedCatches {

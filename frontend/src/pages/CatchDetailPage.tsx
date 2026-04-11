@@ -94,6 +94,11 @@ export default function CatchDetailPage() {
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {catch_.is_personal_best && catch_.weight_lbs != null && (
+            <span className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-300 px-2 py-1 rounded-full font-semibold">
+              🏆 Species PB
+            </span>
+          )}
           {catch_.kept && (
             <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-medium">
               Kept

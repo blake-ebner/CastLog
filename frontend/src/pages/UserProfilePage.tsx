@@ -4,6 +4,7 @@ import { apiGetUserProfile, apiGetUserCatches } from '../api/client'
 import type { UserProfile, PaginatedCatches } from '../types'
 import CatchCard from '../components/CatchCard'
 import Pagination from '../components/Pagination'
+import Achievements from '../components/Achievements'
 import { useAuth } from '../context/AuthContext'
 
 export default function UserProfilePage() {
@@ -93,6 +94,32 @@ export default function UserProfilePage() {
           </>
         )}
       </div>
+
+      {/* Achievements */}
+      {profile && (
+        <div className="mb-8">
+          <Achievements achievements={profile.stats.achievements} />
+        </div>
+      )}
+
+      {/* Species records */}
+      {profile && profile.stats.species_records.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-8">
+          <h2 className="text-lg font-semibold text-slate-800 mb-3">Species Records</h2>
+          <div className="divide-y divide-slate-100">
+            {profile.stats.species_records.map((r) => (
+              <Link
+                key={r.catch_id}
+                to={`/catches/${r.catch_id}`}
+                className="flex items-center justify-between py-2.5 hover:bg-slate-50 -mx-2 px-2 rounded transition-colors"
+              >
+                <span className="text-sm text-slate-700">{r.species}</span>
+                <span className="text-sm font-semibold text-blue-700">{r.weight_lbs} lbs</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Catches */}
       <div className="flex items-center justify-between mb-4">

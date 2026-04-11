@@ -12,9 +12,81 @@ router = APIRouter(prefix="/users", tags=["users"])
 def _build_stats(user_id: int, db: Session) -> schemas.UserStats:
     catches = db.query(models.Catch).filter(models.Catch.user_id == user_id).all()
     total = len(catches)
-    species = len({c.species for c in catches})
+    species_set = {c.species for c in catches}
+    species_count = len(species_set)
     best = max((c.weight_lbs for c in catches if c.weight_lbs), default=None)
-    return schemas.UserStats(total_catches=total, species_count=species, personal_best_lbs=best)
+
+    # Per-species personal bests
+    species_best: dict[str, tuple[float, int]] = {}
+    for c in catches:
+        if c.weight_lbs is not None:
+            if c.species not in species_best or c.weight_lbs > species_best[c.species][0]:
+                species_best[c.species] = (c.weight_lbs, c.id)
+    species_records = [
+        schemas.SpeciesRecord(species=s, weight_lbs=w, catch_id=cid)
+        for s, (w, cid) in sorted(species_best.items(), key=lambda x: x[1][0], reverse=True)
+    ]
+
+    # Achievements
+    max_weight = best or 0
+    achievements = [
+        schemas.Achievement(
+            id="catches_1", name="First Cast",
+            description="Log your first catch", unlocked=total >= 1,
+        ),
+        schemas.Achievement(
+            id="catches_10", name="Getting Started",
+            description="Log 10 catches", unlocked=total >= 10,
+        ),
+        schemas.Achievement(
+            id="catches_100", name="Century Club",
+            description="Log 100 catches", unlocked=total >= 100,
+        ),
+        schemas.Achievement(
+            id="catches_1000", name="Legend",
+            description="Log 1,000 catches", unlocked=total >= 1000,
+        ),
+        schemas.Achievement(
+            id="weight_5", name="5 Pounder",
+            description="Catch a fish weighing 5+ lbs", unlocked=max_weight >= 5,
+        ),
+        schemas.Achievement(
+            id="weight_10", name="10 Pounder",
+            description="Catch a fish weighing 10+ lbs", unlocked=max_weight >= 10,
+        ),
+        schemas.Achievement(
+            id="weight_50", name="50 Pounder",
+            description="Catch a fish weighing 50+ lbs", unlocked=max_weight >= 50,
+        ),
+        schemas.Achievement(
+            id="weight_100", name="Centurion",
+            description="Catch a fish weighing 100+ lbs", unlocked=max_weight >= 100,
+        ),
+        schemas.Achievement(
+            id="species_5", name="Variety Pack",
+            description="Catch 5 different species", unlocked=species_count >= 5,
+        ),
+        schemas.Achievement(
+            id="species_10", name="Species Hunter",
+            description="Catch 10 different species", unlocked=species_count >= 10,
+        ),
+        schemas.Achievement(
+            id="species_25", name="Explorer",
+            description="Catch 25 different species", unlocked=species_count >= 25,
+        ),
+        schemas.Achievement(
+            id="species_100", name="Master Angler",
+            description="Catch 100 different species", unlocked=species_count >= 100,
+        ),
+    ]
+
+    return schemas.UserStats(
+        total_catches=total,
+        species_count=species_count,
+        personal_best_lbs=best,
+        species_records=species_records,
+        achievements=achievements,
+    )
 
 
 @router.get("/{user_id}", response_model=schemas.UserProfile)

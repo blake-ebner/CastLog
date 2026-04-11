@@ -1,6 +1,8 @@
 import { useState, useRef, type FormEvent, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiCreateCatch } from '../api/client'
+import SpeciesInput from '../components/SpeciesInput'
+import FISH_LIST from '../data/fishList'
 
 const WEATHER_OPTIONS = ['Sunny', 'Cloudy', 'Overcast', 'Rainy', 'Windy', 'Foggy']
 const TECHNIQUE_OPTIONS = [
@@ -22,7 +24,6 @@ export default function LogCatchPage() {
     weight_lbs: '',
     length_inches: '',
     water_body: '',
-    caught_at: '',
     bait_lure: '',
     technique: '',
     weather: '',
@@ -54,12 +55,23 @@ export default function LogCatchPage() {
     setError('')
     setLoading(true)
 
+    if (!FISH_LIST.includes(form.species)) {
+      setError('Please select a valid species from the list.')
+      setLoading(false)
+      return
+    }
+
+    if (!photo) {
+      setError('A photo is required.')
+      setLoading(false)
+      return
+    }
+
     const fd = new FormData()
     fd.append('species', form.species)
     if (form.weight_lbs) fd.append('weight_lbs', form.weight_lbs)
     if (form.length_inches) fd.append('length_inches', form.length_inches)
     if (form.water_body) fd.append('water_body', form.water_body)
-    if (form.caught_at) fd.append('caught_at', new Date(form.caught_at).toISOString())
     if (form.bait_lure) fd.append('bait_lure', form.bait_lure)
     if (form.technique) fd.append('technique', form.technique)
     if (form.weather) fd.append('weather', form.weather)
@@ -102,13 +114,10 @@ export default function LogCatchPage() {
             <label className={labelCls}>
               Species <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Largemouth Bass"
+            <SpeciesInput
               value={form.species}
-              onChange={(e) => set('species', e.target.value)}
-              className={inputCls}
+              onChange={(v) => set('species', v)}
+              inputClassName={inputCls}
             />
           </div>
 
@@ -162,15 +171,6 @@ export default function LogCatchPage() {
               placeholder="e.g. Lake Ontario"
               value={form.water_body}
               onChange={(e) => set('water_body', e.target.value)}
-              className={inputCls}
-            />
-          </div>
-          <div>
-            <label className={labelCls}>Date & time caught</label>
-            <input
-              type="datetime-local"
-              value={form.caught_at}
-              onChange={(e) => set('caught_at', e.target.value)}
               className={inputCls}
             />
           </div>
@@ -253,7 +253,9 @@ export default function LogCatchPage() {
           </div>
 
           <div>
-            <label className={labelCls}>Photo</label>
+            <label className={labelCls}>
+              Photo <span className="text-red-500">*</span>
+            </label>
             <input
               ref={fileRef}
               type="file"
@@ -284,10 +286,10 @@ export default function LogCatchPage() {
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="w-full border-2 border-dashed border-slate-300 hover:border-blue-400 rounded-lg h-28 flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-blue-600 transition-colors text-sm"
+                className="w-full border-2 border-dashed border-red-300 hover:border-blue-400 rounded-lg h-28 flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-blue-600 transition-colors text-sm"
               >
                 <span className="text-2xl">📷</span>
-                Click to upload a photo
+                Click to upload a photo (required)
               </button>
             )}
           </div>

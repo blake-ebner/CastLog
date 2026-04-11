@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
@@ -59,6 +60,9 @@ async def create_catch(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    if not photo or not photo.filename:
+        raise HTTPException(status_code=400, detail="A photo is required")
+
     photo_url: Optional[str] = None
 
     if photo and photo.filename:
@@ -109,6 +113,18 @@ def get_catch(catch_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Catch not found")
     out = schemas.CatchOut.model_validate(catch)
     out.username = catch.user.username
+
+    if catch.weight_lbs is not None:
+        best = (
+            db.query(func.max(models.Catch.weight_lbs))
+            .filter(
+                models.Catch.user_id == catch.user_id,
+                models.Catch.species == catch.species,
+            )
+            .scalar()
+        )
+        out.is_personal_best = catch.weight_lbs >= best
+
     return out
 
 

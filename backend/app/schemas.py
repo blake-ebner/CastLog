@@ -32,10 +32,25 @@ class UserOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class Achievement(BaseModel):
+    id: str
+    name: str
+    description: str
+    unlocked: bool
+
+
+class SpeciesRecord(BaseModel):
+    species: str
+    weight_lbs: float
+    catch_id: int
+
+
 class UserStats(BaseModel):
     total_catches: int
     species_count: int
     personal_best_lbs: Optional[float]
+    species_records: list[SpeciesRecord]
+    achievements: list[Achievement]
 
 
 class UserProfile(BaseModel):
@@ -76,6 +91,7 @@ class CatchOut(BaseModel):
     photo_url: Optional[str]
     created_at: datetime
     username: Optional[str] = None
+    is_personal_best: bool = False
 
     model_config = {"from_attributes": True}
 
