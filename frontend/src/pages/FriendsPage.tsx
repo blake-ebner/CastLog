@@ -8,10 +8,16 @@ import {
   apiRemoveFriend,
   apiSearchUsers,
   apiSendFriendRequest,
+  apiGetFriendsFeed,
 } from '../api/client'
-import type { FriendData, UserOut } from '../types'
+import type { FriendData, UserOut, PaginatedCatches } from '../types'
+import CatchCard from '../components/CatchCard'
+import Pagination from '../components/Pagination'
+
+type Tab = 'friends' | 'feed'
 
 export default function FriendsPage() {
+  const [tab, setTab] = useState<Tab>('friends')
   const [data, setData] = useState<FriendData | null>(null)
   const [error, setError] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -20,6 +26,10 @@ export default function FriendsPage() {
   const [pendingActions, setPendingActions] = useState<Set<number>>(new Set())
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const [feed, setFeed] = useState<PaginatedCatches | null>(null)
+  const [feedPage, setFeedPage] = useState(1)
+  const [feedError, setFeedError] = useState('')
+
   const load = () => {
     apiGetFriends()
       .then(setData)
@@ -27,6 +37,14 @@ export default function FriendsPage() {
   }
 
   useEffect(() => { load() }, [])
+
+  useEffect(() => {
+    if (tab !== 'feed') return
+    setFeedError('')
+    apiGetFriendsFeed(feedPage)
+      .then(setFeed)
+      .catch((e: Error) => setFeedError(e.message))
+  }, [tab, feedPage])
 
   // Debounced search
   useEffect(() => {
@@ -60,13 +78,65 @@ export default function FriendsPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Friends</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Friends</h1>
+        <div className="flex rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 text-sm font-medium">
+          <button
+            onClick={() => setTab('friends')}
+            className={`px-4 py-1.5 transition-colors ${tab === 'friends' ? 'bg-blue-700 text-white' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+          >
+            Friends
+          </button>
+          <button
+            onClick={() => setTab('feed')}
+            className={`px-4 py-1.5 transition-colors ${tab === 'feed' ? 'bg-blue-700 text-white' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+          >
+            Feed
+          </button>
+        </div>
+      </div>
 
       {error && (
         <div className="text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-sm">
           {error}
         </div>
       )}
+
+      {/* ── Friends Feed tab ──────────────────────────────────────────── */}
+      {tab === 'feed' && (
+        <section>
+          {feedError && (
+            <div className="text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-sm mb-4">
+              {feedError}
+            </div>
+          )}
+          {!feed ? (
+            <div className="animate-pulse grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-48 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+              ))}
+            </div>
+          ) : feed.items.length === 0 ? (
+            <div className="text-center py-16 text-slate-500 dark:text-slate-400 text-sm bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+              <p className="text-3xl mb-2">🎣</p>
+              <p>No catches from friends yet — add some friends to see their catches here!</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {feed.items.map((c) => (
+                  <CatchCard key={c.id} catch_={c} />
+                ))}
+              </div>
+              <Pagination page={feed.page} pages={feed.pages} onPageChange={setFeedPage} />
+            </>
+          )}
+        </section>
+      )}
+
+      {/* ── Friends management tab ────────────────────────────────────── */}
+      {tab === 'friends' && (
+        <>
 
       {/* ── Incoming requests ─────────────────────────────────────────── */}
       {data && data.incoming_requests.length > 0 && (
@@ -221,6 +291,8 @@ export default function FriendsPage() {
             ))}
           </div>
         </section>
+      )}
+        </>
       )}
     </div>
   )

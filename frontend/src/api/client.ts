@@ -149,3 +149,10 @@ export async function apiSearchUsers(q: string): Promise<UserSearchResult> {
   const res = await fetch(`${BASE}/users/search?q=${encodeURIComponent(q)}`)
   return handleResponse<UserSearchResult>(res)
 }
+
+export async function apiGetFriendsFeed(page = 1, pageSize = 20): Promise<PaginatedCatches> {
+  const res = await fetch(`${BASE}/friends/feed?page=${page}&page_size=${pageSize}`, {
+    headers: authHeader(),
+  })
+  return handleResponse<PaginatedCatches>(res)
+}

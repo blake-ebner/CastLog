@@ -1,3 +1,4 @@
+import math
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
@@ -17,6 +18,52 @@ def _get_friendship(user_a: int, user_b: int, db: Session):
             and_(models.Friendship.requester_id == user_b, models.Friendship.addressee_id == user_a),
         )
     ).first()
+
+
+@router.get("/feed", response_model=schemas.PaginatedCatches)
+def get_friends_feed(
+    page: int = 1,
+    page_size: int = 20,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    uid = current_user.id
+
+    accepted = db.query(models.Friendship).filter(
+        models.Friendship.status == "accepted",
+        or_(models.Friendship.requester_id == uid, models.Friendship.addressee_id == uid),
+    ).all()
+
+    friend_ids = [
+        row.addressee_id if row.requester_id == uid else row.requester_id
+        for row in accepted
+    ]
+
+    if not friend_ids:
+        return schemas.PaginatedCatches(items=[], total=0, page=page, page_size=page_size, pages=0)
+
+    query = (
+        db.query(models.Catch)
+        .join(models.User)
+        .filter(models.Catch.user_id.in_(friend_ids))
+        .order_by(models.Catch.caught_at.desc())
+    )
+    total = query.count()
+    catches = query.offset((page - 1) * page_size).limit(page_size).all()
+
+    items = []
+    for c in catches:
+        out = schemas.CatchOut.model_validate(c)
+        out.username = c.user.username
+        items.append(out)
+
+    return schemas.PaginatedCatches(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=math.ceil(total / page_size) if total else 0,
+    )
 
 
 @router.get("/status/{user_id}", response_model=schemas.FriendshipStatus)
