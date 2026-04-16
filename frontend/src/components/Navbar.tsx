@@ -1,11 +1,19 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { apiGetFriends } from '../api/client'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
   const { dark, toggle } = useTheme()
   const navigate = useNavigate()
+  const [pendingCount, setPendingCount] = useState(0)
+
+  useEffect(() => {
+    if (!user) { setPendingCount(0); return }
+    apiGetFriends().then((d) => setPendingCount(d.incoming_requests.length)).catch(() => {})
+  }, [user])
 
   const handleLogout = () => {
     logout()
@@ -31,6 +39,14 @@ export default function Navbar() {
                 className="bg-blue-500 hover:bg-blue-400 dark:bg-blue-700 dark:hover:bg-blue-600 px-3 py-1.5 rounded-md font-medium transition-colors"
               >
                 + Log Catch
+              </Link>
+              <Link to="/friends" className="relative hover:text-blue-200 transition-colors">
+                Friends
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                    !
+                  </span>
+                )}
               </Link>
               <Link
                 to={`/users/${user.id}`}

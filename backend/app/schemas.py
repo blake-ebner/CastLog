@@ -102,3 +102,29 @@ class PaginatedCatches(BaseModel):
     page: int
     page_size: int
     pages: int
+
+
+# ── Friends ───────────────────────────────────────────────────────────────────
+
+class FriendRequestOut(BaseModel):
+    id: int
+    user: UserOut  # the other person in the relationship
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class FriendshipStatus(BaseModel):
+    # "none" | "pending_sent" | "pending_received" | "friends"
+    status: str
+    request_id: Optional[int] = None
+
+
+class FriendData(BaseModel):
+    friends: list[UserOut]
+    incoming_requests: list[FriendRequestOut]
+    outgoing_requests: list[FriendRequestOut]
+
+
+class UserSearchResult(BaseModel):
+    users: list[UserOut]

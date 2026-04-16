@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { apiGetUserProfile, apiGetUserCatches } from '../api/client'
-import type { UserProfile, PaginatedCatches } from '../types'
+import {
+  apiGetUserProfile,
+  apiGetUserCatches,
+  apiGetFriendshipStatus,
+  apiSendFriendRequest,
+  apiAcceptFriendRequest,
+  apiDeclineFriendRequest,
+  apiCancelFriendRequest,
+  apiRemoveFriend,
+} from '../api/client'
+import type { UserProfile, PaginatedCatches, FriendshipStatus } from '../types'
 import CatchCard from '../components/CatchCard'
 import Pagination from '../components/Pagination'
 import Achievements from '../components/Achievements'
@@ -15,13 +24,18 @@ export default function UserProfilePage() {
   const [catches, setCatches] = useState<PaginatedCatches | null>(null)
   const [page, setPage] = useState(1)
   const [error, setError] = useState('')
+  const [friendStatus, setFriendStatus] = useState<FriendshipStatus | null>(null)
+  const [friendPending, setFriendPending] = useState(false)
 
   useEffect(() => {
     if (!id) return
     const uid = Number(id)
     setError('')
     apiGetUserProfile(uid).then(setProfile).catch((e: Error) => setError(e.message))
-  }, [id])
+    if (me && me.id !== uid) {
+      apiGetFriendshipStatus(uid).then(setFriendStatus).catch(() => {})
+    }
+  }, [id, me])
 
   useEffect(() => {
     if (!id) return
@@ -37,6 +51,43 @@ export default function UserProfilePage() {
   }
 
   const isMe = me?.id === Number(id)
+
+  const handleFriendAction = async () => {
+    if (!friendStatus || !id) return
+    setFriendPending(true)
+    try {
+      const uid = Number(id)
+      if (friendStatus.status === 'none') {
+        await apiSendFriendRequest(uid)
+      } else if (friendStatus.status === 'pending_received' && friendStatus.request_id) {
+        await apiAcceptFriendRequest(friendStatus.request_id)
+      } else if (friendStatus.status === 'pending_sent' && friendStatus.request_id) {
+        await apiCancelFriendRequest(friendStatus.request_id)
+      } else if (friendStatus.status === 'friends') {
+        await apiRemoveFriend(uid)
+      }
+      const updated = await apiGetFriendshipStatus(uid)
+      setFriendStatus(updated)
+    } catch {
+      // silently ignore — user stays on the page
+    } finally {
+      setFriendPending(false)
+    }
+  }
+
+  const handleDecline = async () => {
+    if (!friendStatus?.request_id || !id) return
+    setFriendPending(true)
+    try {
+      await apiDeclineFriendRequest(friendStatus.request_id)
+      setFriendStatus({ status: 'none', request_id: null })
+    } catch {
+      // ignore
+    } finally {
+      setFriendPending(false)
+    }
+  }
+
   const joined = profile
     ? new Date(profile.user.created_at).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -67,6 +118,42 @@ export default function UserProfilePage() {
                 </h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Member since {joined}</p>
               </div>
+
+              {/* Friend button — only visible to logged-in users viewing someone else */}
+              {me && !isMe && friendStatus && (
+                <div className="flex gap-2 ml-4">
+                  {friendStatus.status === 'pending_received' && (
+                    <button
+                      disabled={friendPending}
+                      onClick={handleDecline}
+                      className="text-sm px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 disabled:opacity-50 text-slate-700 dark:text-slate-200 font-medium transition-colors"
+                    >
+                      Decline
+                    </button>
+                  )}
+                  <button
+                    disabled={friendPending}
+                    onClick={handleFriendAction}
+                    className={`text-sm px-3 py-1.5 rounded-md font-medium transition-colors disabled:opacity-50 ${
+                      friendStatus.status === 'friends'
+                        ? 'bg-slate-100 hover:bg-red-50 dark:bg-slate-700 dark:hover:bg-red-900/30 text-slate-700 dark:text-slate-200 hover:text-red-600 dark:hover:text-red-400'
+                        : friendStatus.status === 'pending_sent'
+                        ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200'
+                        : friendStatus.status === 'pending_received'
+                        ? 'bg-blue-700 hover:bg-blue-600 text-white'
+                        : 'bg-blue-700 hover:bg-blue-600 text-white'
+                    }`}
+                  >
+                    {friendStatus.status === 'friends'
+                      ? 'Friends'
+                      : friendStatus.status === 'pending_sent'
+                      ? 'Request Sent'
+                      : friendStatus.status === 'pending_received'
+                      ? 'Accept Request'
+                      : 'Add Friend'}
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="mt-5 grid grid-cols-3 gap-4">

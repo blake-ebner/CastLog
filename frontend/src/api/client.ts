@@ -1,4 +1,4 @@
-import type { Token, UserProfile, CatchOut, PaginatedCatches } from '../types'
+import type { Token, UserProfile, CatchOut, PaginatedCatches, FriendData, FriendshipStatus, UserSearchResult } from '../types'
 
 const BASE = '/api'
 
@@ -91,4 +91,61 @@ export async function apiDeleteCatch(id: number): Promise<void> {
     headers: authHeader(),
   })
   return handleResponse<void>(res)
+}
+
+// ── Friends ───────────────────────────────────────────────────────────────────
+
+export async function apiGetFriends(): Promise<FriendData> {
+  const res = await fetch(`${BASE}/friends`, { headers: authHeader() })
+  return handleResponse<FriendData>(res)
+}
+
+export async function apiGetFriendshipStatus(userId: number): Promise<FriendshipStatus> {
+  const res = await fetch(`${BASE}/friends/status/${userId}`, { headers: authHeader() })
+  return handleResponse<FriendshipStatus>(res)
+}
+
+export async function apiSendFriendRequest(userId: number): Promise<void> {
+  const res = await fetch(`${BASE}/friends/request/${userId}`, {
+    method: 'POST',
+    headers: authHeader(),
+  })
+  return handleResponse<void>(res)
+}
+
+export async function apiAcceptFriendRequest(requestId: number): Promise<void> {
+  const res = await fetch(`${BASE}/friends/accept/${requestId}`, {
+    method: 'POST',
+    headers: authHeader(),
+  })
+  return handleResponse<void>(res)
+}
+
+export async function apiDeclineFriendRequest(requestId: number): Promise<void> {
+  const res = await fetch(`${BASE}/friends/decline/${requestId}`, {
+    method: 'POST',
+    headers: authHeader(),
+  })
+  return handleResponse<void>(res)
+}
+
+export async function apiCancelFriendRequest(requestId: number): Promise<void> {
+  const res = await fetch(`${BASE}/friends/request/${requestId}`, {
+    method: 'DELETE',
+    headers: authHeader(),
+  })
+  return handleResponse<void>(res)
+}
+
+export async function apiRemoveFriend(userId: number): Promise<void> {
+  const res = await fetch(`${BASE}/friends/${userId}`, {
+    method: 'DELETE',
+    headers: authHeader(),
+  })
+  return handleResponse<void>(res)
+}
+
+export async function apiSearchUsers(q: string): Promise<UserSearchResult> {
+  const res = await fetch(`${BASE}/users/search?q=${encodeURIComponent(q)}`)
+  return handleResponse<UserSearchResult>(res)
 }

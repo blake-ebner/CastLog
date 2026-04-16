@@ -89,6 +89,19 @@ def _build_stats(user_id: int, db: Session) -> schemas.UserStats:
     )
 
 
+@router.get("/search", response_model=schemas.UserSearchResult)
+def search_users(q: str = "", db: Session = Depends(get_db)):
+    if not q or len(q.strip()) < 1:
+        return schemas.UserSearchResult(users=[])
+    results = (
+        db.query(models.User)
+        .filter(models.User.username.ilike(f"%{q.strip()}%"))
+        .limit(20)
+        .all()
+    )
+    return schemas.UserSearchResult(users=[schemas.UserOut.model_validate(u) for u in results])
+
+
 @router.get("/{user_id}", response_model=schemas.UserProfile)
 def get_profile(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()

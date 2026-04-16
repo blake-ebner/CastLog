@@ -63,3 +63,27 @@ export interface PaginatedCatches {
   page_size: number
   pages: number
 }
+
+// ── Friends ───────────────────────────────────────────────────────────────────
+
+export interface FriendRequestOut {
+  id: number
+  user: UserOut
+  created_at: string
+}
+
+export interface FriendshipStatus {
+  // "none" | "pending_sent" | "pending_received" | "friends" | "self"
+  status: string
+  request_id: number | null
+}
+
+export interface FriendData {
+  friends: UserOut[]
+  incoming_requests: FriendRequestOut[]
+  outgoing_requests: FriendRequestOut[]
+}
+
+export interface UserSearchResult {
+  users: UserOut[]
+}
