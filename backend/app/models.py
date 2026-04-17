@@ -38,6 +38,7 @@ class Catch(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="catches")
+    comments = relationship("Comment", back_populates="catch", cascade="all, delete-orphan")
 
 
 class Friendship(Base):
@@ -54,3 +55,16 @@ class Friendship(Base):
     addressee = relationship("User", foreign_keys=[addressee_id])
 
     __table_args__ = (UniqueConstraint("requester_id", "addressee_id", name="uq_friendship"),)
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    catch_id = Column(Integer, ForeignKey("catches.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    body = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    catch = relationship("Catch", back_populates="comments")
+    user = relationship("User")

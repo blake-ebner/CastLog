@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { apiGetCatch, apiDeleteCatch } from '../api/client'
-import type { CatchOut } from '../types'
+import { apiGetCatch, apiDeleteCatch, apiGetComments, apiPostComment, apiDeleteComment } from '../api/client'
+import type { CatchOut, CommentOut } from '../types'
 import { useAuth } from '../context/AuthContext'
 
 function Row({ label, value }: { label: string; value: string | number | null | undefined }) {
@@ -23,12 +23,46 @@ export default function CatchDetailPage() {
   const [error, setError] = useState('')
   const [deleting, setDeleting] = useState(false)
 
+  const [comments, setComments] = useState<CommentOut[]>([])
+  const [commentBody, setCommentBody] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [commentError, setCommentError] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
   useEffect(() => {
     if (!id) return
     apiGetCatch(Number(id))
       .then(setCatch)
       .catch((e: Error) => setError(e.message))
+    apiGetComments(Number(id))
+      .then(setComments)
+      .catch(() => {})
   }, [id])
+
+  const handleComment = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!catch_ || !commentBody.trim()) return
+    setSubmitting(true)
+    setCommentError('')
+    try {
+      const newComment = await apiPostComment(catch_.id, commentBody.trim())
+      setComments((prev) => [...prev, newComment])
+      setCommentBody('')
+    } catch (e: unknown) {
+      setCommentError(e instanceof Error ? e.message : 'Failed to post comment')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleDeleteComment = async (commentId: number) => {
+    try {
+      await apiDeleteComment(commentId)
+      setComments((prev) => prev.filter((c) => c.id !== commentId))
+    } catch {
+      // ignore
+    }
+  }
 
   const handleDelete = async () => {
     if (!catch_ || !confirm('Delete this catch? This cannot be undone.')) return
@@ -133,6 +167,77 @@ export default function CatchDetailPage() {
           <p className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-wrap">{catch_.notes}</p>
         </div>
       )}
+
+      {/* ── Comments ───────────────────────────────────────────────── */}
+      <div className="mt-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
+        <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100 mb-4">
+          Comments {comments.length > 0 && <span className="text-slate-400 font-normal">({comments.length})</span>}
+        </h2>
+
+        {comments.length === 0 && (
+          <p className="text-sm text-slate-400 dark:text-slate-500 mb-4">No comments yet — be the first!</p>
+        )}
+
+        {comments.length > 0 && (
+          <div className="space-y-3 mb-5">
+            {comments.map((c) => (
+              <div key={c.id} className="flex gap-3 group">
+                <div className="flex-1 bg-slate-50 dark:bg-slate-700/50 rounded-lg px-3 py-2">
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <Link
+                      to={`/users/${c.user_id}`}
+                      className="text-xs font-semibold text-blue-700 dark:text-blue-400 hover:underline"
+                    >
+                      @{c.username}
+                    </Link>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-400">
+                        {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                      {user?.id === c.user_id && (
+                        <button
+                          onClick={() => handleDeleteComment(c.id)}
+                          className="text-xs text-slate-300 hover:text-red-500 dark:text-slate-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-wrap">{c.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {user ? (
+          <form onSubmit={handleComment} className="flex flex-col gap-2">
+            {commentError && (
+              <p className="text-xs text-red-500">{commentError}</p>
+            )}
+            <textarea
+              ref={textareaRef}
+              value={commentBody}
+              onChange={(e) => setCommentBody(e.target.value)}
+              placeholder="Write a comment…"
+              rows={2}
+              className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+            <button
+              type="submit"
+              disabled={submitting || !commentBody.trim()}
+              className="self-end bg-blue-700 hover:bg-blue-600 disabled:opacity-50 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors"
+            >
+              {submitting ? 'Posting…' : 'Post'}
+            </button>
+          </form>
+        ) : (
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            <Link to="/login" className="text-blue-700 dark:text-blue-400 hover:underline">Log in</Link> to leave a comment.
+          </p>
+        )}
+      </div>
 
       <div className="mt-6">
         <Link to="/" className="text-sm text-blue-700 dark:text-blue-400 hover:underline">

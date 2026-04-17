@@ -87,3 +87,14 @@ export interface FriendData {
 export interface UserSearchResult {
   users: UserOut[]
 }
+
+// ── Comments ──────────────────────────────────────────────────────────────────
+
+export interface CommentOut {
+  id: number
+  catch_id: number
+  user_id: number
+  username: string
+  body: string
+  created_at: string
+}

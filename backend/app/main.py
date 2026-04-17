@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
-from .routers import auth, catches, users, friends
+from .routers import auth, catches, users, friends, comments
 
 app = FastAPI(title="CastLog API", version="1.0.0")
 
@@ -28,6 +28,7 @@ app.include_router(auth.router)
 app.include_router(catches.router)
 app.include_router(users.router)
 app.include_router(friends.router)
+app.include_router(comments.router)
 
 
 @app.get("/health")

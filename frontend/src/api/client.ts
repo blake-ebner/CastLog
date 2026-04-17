@@ -1,4 +1,4 @@
-import type { Token, UserProfile, CatchOut, PaginatedCatches, FriendData, FriendshipStatus, UserSearchResult } from '../types'
+import type { Token, UserProfile, CatchOut, PaginatedCatches, FriendData, FriendshipStatus, UserSearchResult, CommentOut } from '../types'
 
 const BASE = '/api'
 
@@ -155,4 +155,28 @@ export async function apiGetFriendsFeed(page = 1, pageSize = 20): Promise<Pagina
     headers: authHeader(),
   })
   return handleResponse<PaginatedCatches>(res)
+}
+
+// ── Comments ──────────────────────────────────────────────────────────────────
+
+export async function apiGetComments(catchId: number): Promise<CommentOut[]> {
+  const res = await fetch(`${BASE}/catches/${catchId}/comments`)
+  return handleResponse<CommentOut[]>(res)
+}
+
+export async function apiPostComment(catchId: number, body: string): Promise<CommentOut> {
+  const res = await fetch(`${BASE}/catches/${catchId}/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({ body }),
+  })
+  return handleResponse<CommentOut>(res)
+}
+
+export async function apiDeleteComment(commentId: number): Promise<void> {
+  const res = await fetch(`${BASE}/comments/${commentId}`, {
+    method: 'DELETE',
+    headers: authHeader(),
+  })
+  return handleResponse<void>(res)
 }

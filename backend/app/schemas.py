@@ -128,3 +128,20 @@ class FriendData(BaseModel):
 
 class UserSearchResult(BaseModel):
     users: list[UserOut]
+
+
+# ── Comments ──────────────────────────────────────────────────────────────────
+
+class CommentCreate(BaseModel):
+    body: str
+
+
+class CommentOut(BaseModel):
+    id: int
+    catch_id: int
+    user_id: int
+    username: str
+    body: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
