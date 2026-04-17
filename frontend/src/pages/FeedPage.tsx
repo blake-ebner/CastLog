@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { apiListCatches } from '../api/client'
 import type { PaginatedCatches } from '../types'
 import CatchCard from '../components/CatchCard'
 import Pagination from '../components/Pagination'
-import { useAuth } from '../context/AuthContext'
 
 export default function FeedPage() {
-  const { user } = useAuth()
   const [data, setData] = useState<PaginatedCatches | null>(null)
   const [page, setPage] = useState(1)
   const [error, setError] = useState('')
@@ -28,14 +25,6 @@ export default function FeedPage() {
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{data.total} catches logged</p>
           )}
         </div>
-        {user && (
-          <Link
-            to="/log"
-            className="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-          >
-            + Log a Catch
-          </Link>
-        )}
       </div>
 
       {error && (
