@@ -1,4 +1,4 @@
-import type { Token, UserProfile, CatchOut, PaginatedCatches, FriendData, FriendshipStatus, UserSearchResult, CommentOut } from '../types'
+import type { Token, UserProfile, CatchOut, PaginatedCatches, FriendData, FriendshipStatus, UserSearchResult, CommentOut, MessageOut, ConversationSummary } from '../types'
 
 const BASE = '/api'
 
@@ -155,6 +155,35 @@ export async function apiGetFriendsFeed(page = 1, pageSize = 20): Promise<Pagina
     headers: authHeader(),
   })
   return handleResponse<PaginatedCatches>(res)
+}
+
+// ── Messages ──────────────────────────────────────────────────────────────────
+
+export async function apiGetConversations(): Promise<ConversationSummary[]> {
+  const res = await fetch(`${BASE}/messages/conversations`, { headers: authHeader() })
+  return handleResponse<ConversationSummary[]>(res)
+}
+
+export async function apiGetConversation(userId: number): Promise<MessageOut[]> {
+  const res = await fetch(`${BASE}/messages/${userId}`, { headers: authHeader() })
+  return handleResponse<MessageOut[]>(res)
+}
+
+export async function apiSendMessage(userId: number, body: string): Promise<MessageOut> {
+  const res = await fetch(`${BASE}/messages/${userId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({ body }),
+  })
+  return handleResponse<MessageOut>(res)
+}
+
+export async function apiDeleteMessage(messageId: number): Promise<void> {
+  const res = await fetch(`${BASE}/messages/${messageId}`, {
+    method: 'DELETE',
+    headers: authHeader(),
+  })
+  return handleResponse<void>(res)
 }
 
 // ── Comments ──────────────────────────────────────────────────────────────────

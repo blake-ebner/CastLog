@@ -145,13 +145,21 @@ export default function UserProfilePage() {
                     }`}
                   >
                     {friendStatus.status === 'friends'
-                      ? 'Friends'
+                      ? 'Remove Friend'
                       : friendStatus.status === 'pending_sent'
                       ? 'Request Sent'
                       : friendStatus.status === 'pending_received'
                       ? 'Accept Request'
                       : 'Add Friend'}
                   </button>
+                  {friendStatus.status === 'friends' && (
+                    <Link
+                      to={`/messages/${Number(id)}`}
+                      className="text-sm px-3 py-1.5 rounded-md font-medium transition-colors bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
+                    >
+                      Message
+                    </Link>
+                  )}
                 </div>
               )}
             </div>

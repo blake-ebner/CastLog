@@ -3,6 +3,7 @@ import { apiListCatches } from '../api/client'
 import type { PaginatedCatches } from '../types'
 import CatchCard from '../components/CatchCard'
 import Pagination from '../components/Pagination'
+import WeatherWidget from '../components/WeatherWidget'
 
 export default function FeedPage() {
   const [data, setData] = useState<PaginatedCatches | null>(null)
@@ -26,6 +27,8 @@ export default function FeedPage() {
           )}
         </div>
       </div>
+
+      <WeatherWidget />
 
       {error && (
         <div className="text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">

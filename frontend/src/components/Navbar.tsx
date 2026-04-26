@@ -2,17 +2,26 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
-import { apiGetFriends } from '../api/client'
+import { apiGetFriends, apiGetConversations } from '../api/client'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
   const { dark, toggle } = useTheme()
   const navigate = useNavigate()
   const [pendingCount, setPendingCount] = useState(0)
+  const [unreadMessages, setUnreadMessages] = useState(0)
 
   useEffect(() => {
-    if (!user) { setPendingCount(0); return }
+    if (!user) { setPendingCount(0); setUnreadMessages(0); return }
     apiGetFriends().then((d) => setPendingCount(d.incoming_requests.length)).catch(() => {})
+    const lastViewed = localStorage.getItem('messages_last_viewed')
+    apiGetConversations().then((convs) => {
+      const count = convs.filter((c) =>
+        c.last_message.sender_id !== user.id &&
+        (!lastViewed || new Date(c.last_message.created_at) > new Date(lastViewed))
+      ).length
+      setUnreadMessages(count)
+    }).catch(() => {})
   }, [user])
 
   const handleLogout = () => {
@@ -40,7 +49,23 @@ export default function Navbar() {
               >
                 + Log Catch
               </Link>
-              <Link to="/friends" className="relative hover:text-blue-200 transition-colors">
+              <Link
+                to="/messages"
+                className="relative hover:text-blue-200 transition-colors"
+                onClick={() => { setUnreadMessages(0); localStorage.setItem('messages_last_viewed', new Date().toISOString()) }}
+              >
+                Messages
+                {unreadMessages > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                    !
+                  </span>
+                )}
+              </Link>
+              <Link
+                to="/friends"
+                className="relative hover:text-blue-200 transition-colors"
+                onClick={() => setPendingCount(0)}
+              >
                 Friends
                 {pendingCount > 0 && (
                   <span className="absolute -top-1.5 -right-2.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">

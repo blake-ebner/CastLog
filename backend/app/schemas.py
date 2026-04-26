@@ -130,6 +130,28 @@ class UserSearchResult(BaseModel):
     users: list[UserOut]
 
 
+# ── Messages ──────────────────────────────────────────────────────────────────
+
+class MessageCreate(BaseModel):
+    body: str
+
+
+class MessageOut(BaseModel):
+    id: int
+    sender_id: int
+    receiver_id: int
+    body: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class ConversationSummary(BaseModel):
+    friend: UserOut
+    last_message: MessageOut
+    unread_count: int
+
+
 # ── Comments ──────────────────────────────────────────────────────────────────
 
 class CommentCreate(BaseModel):

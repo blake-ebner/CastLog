@@ -88,6 +88,22 @@ export interface UserSearchResult {
   users: UserOut[]
 }
 
+// ── Messages ──────────────────────────────────────────────────────────────────
+
+export interface MessageOut {
+  id: number
+  sender_id: number
+  receiver_id: number
+  body: string
+  created_at: string
+}
+
+export interface ConversationSummary {
+  friend: UserOut
+  last_message: MessageOut
+  unread_count: number
+}
+
 // ── Comments ──────────────────────────────────────────────────────────────────
 
 export interface CommentOut {

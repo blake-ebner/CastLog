@@ -9,6 +9,7 @@ import LogCatchPage from './pages/LogCatchPage'
 import CatchDetailPage from './pages/CatchDetailPage'
 import UserProfilePage from './pages/UserProfilePage'
 import FriendsPage from './pages/FriendsPage'
+import MessagesPage from './pages/MessagesPage'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -47,6 +48,22 @@ function AppRoutes() {
         element={
           <RequireAuth>
             <FriendsPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/messages"
+        element={
+          <RequireAuth>
+            <MessagesPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/messages/:userId"
+        element={
+          <RequireAuth>
+            <MessagesPage />
           </RequireAuth>
         }
       />
