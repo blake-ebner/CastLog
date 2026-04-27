@@ -6,7 +6,6 @@ export interface Token {
 export interface UserOut {
   id: number
   username: string
-  email: string
   created_at: string
 }
 

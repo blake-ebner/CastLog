@@ -1,14 +1,14 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 class UserCreate(BaseModel):
-    username: str
+    username: str = Field(min_length=1, max_length=30)
     email: EmailStr
-    password: str
+    password: str = Field(min_length=8, max_length=128)
 
 
 class UserLogin(BaseModel):
@@ -26,7 +26,6 @@ class Token(BaseModel):
 class UserOut(BaseModel):
     id: int
     username: str
-    email: str
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -133,7 +132,7 @@ class UserSearchResult(BaseModel):
 # ── Messages ──────────────────────────────────────────────────────────────────
 
 class MessageCreate(BaseModel):
-    body: str
+    body: str = Field(min_length=1, max_length=2000)
 
 
 class MessageOut(BaseModel):
@@ -155,7 +154,7 @@ class ConversationSummary(BaseModel):
 # ── Comments ──────────────────────────────────────────────────────────────────
 
 class CommentCreate(BaseModel):
-    body: str
+    body: str = Field(min_length=1, max_length=1000)
 
 
 class CommentOut(BaseModel):

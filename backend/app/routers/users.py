@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
@@ -114,8 +114,8 @@ def get_profile(user_id: int, db: Session = Depends(get_db)):
 @router.get("/{user_id}/catches", response_model=schemas.PaginatedCatches)
 def get_user_catches(
     user_id: int,
-    page: int = 1,
-    page_size: int = 20,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
     user = db.query(models.User).filter(models.User.id == user_id).first()

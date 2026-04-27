@@ -3,7 +3,7 @@ import math
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -19,7 +19,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 
 @router.get("", response_model=schemas.PaginatedCatches)
-def list_catches(page: int = 1, page_size: int = 20, db: Session = Depends(get_db)):
+def list_catches(page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100), db: Session = Depends(get_db)):
     query = (
         db.query(models.Catch)
         .join(models.User)
@@ -45,17 +45,17 @@ def list_catches(page: int = 1, page_size: int = 20, db: Session = Depends(get_d
 
 @router.post("", response_model=schemas.CatchOut, status_code=status.HTTP_201_CREATED)
 async def create_catch(
-    species: str = Form(...),
+    species: str = Form(..., max_length=100),
     weight_lbs: Optional[float] = Form(None),
     length_inches: Optional[float] = Form(None),
-    water_body: Optional[str] = Form(None),
+    water_body: Optional[str] = Form(None, max_length=200),
     caught_at: Optional[str] = Form(None),
-    bait_lure: Optional[str] = Form(None),
-    technique: Optional[str] = Form(None),
-    weather: Optional[str] = Form(None),
+    bait_lure: Optional[str] = Form(None, max_length=200),
+    technique: Optional[str] = Form(None, max_length=100),
+    weather: Optional[str] = Form(None, max_length=50),
     water_temp_f: Optional[float] = Form(None),
     kept: bool = Form(False),
-    notes: Optional[str] = Form(None),
+    notes: Optional[str] = Form(None, max_length=2000),
     photo: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
