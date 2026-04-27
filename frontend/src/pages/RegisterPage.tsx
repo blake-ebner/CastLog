@@ -7,8 +7,9 @@ export default function RegisterPage() {
   const navigate = useNavigate()
 
   const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  // Email is kept in the backend but not collected from the user yet
+  const email = `${username}@placeholder.castlog`
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -56,18 +57,6 @@ export default function RegisterPage() {
               onChange={(e) => setUsername(e.target.value)}
               className={inputCls}
               autoComplete="username"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputCls}
-              autoComplete="email"
             />
           </div>
 
